@@ -1,2 +1,0 @@
-num_screenshots= 15 
-intervals= 5  
