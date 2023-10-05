@@ -1,0 +1,47 @@
+import os
+from PIL import Image
+import pytesseract
+
+screenshots_dir = "Screenshots"
+extraction_folder = "Extracting_Words"
+
+default_language = 'eng'
+
+os.makedirs(extraction_folder, exist_ok=True)
+
+existing_files = [f for f in os.listdir(extraction_folder) if os.path.isfile(os.path.join(extraction_folder, f))]
+for file_to_delete in existing_files:
+    os.remove(os.path.join(extraction_folder, file_to_delete))
+
+screenshot_files = [f for f in os.listdir(screenshots_dir) if f.endswith(".png")]
+
+screenshot_files.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
+
+if not screenshot_files:
+    print(f"No screenshot files found in '{screenshots_dir}'.")
+else:
+    for index, screenshot_file in enumerate(screenshot_files, start=1):
+        screenshot_path = os.path.join(screenshots_dir, screenshot_file)
+        image = Image.open(screenshot_path)
+
+        try:
+            extracted_text = pytesseract.image_to_string(image, lang=default_language)
+
+            words = extracted_text.split()
+
+            padded_index = str(index).zfill(3)
+
+            text_file_path = os.path.join(extraction_folder, f"{padded_index}_{screenshot_file}_words.txt")
+
+            with open(text_file_path, "w", encoding="utf-8") as text_file:
+                for word in words:
+                    text_file.write(word + "\n")
+
+            print(f"Extracted words from '{screenshot_file}':")
+            print(words)
+            print(f"Note: Saved extracted words to '{padded_index}_{screenshot_file}_words.txt'")
+            print("-" * 100)
+
+        except Exception as e:
+            error_message = f"Error during OCR for '{screenshot_file}': {str(e)}"
+            print(error_message)
