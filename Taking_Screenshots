@@ -1,0 +1,39 @@
+import pyautogui
+import time
+import os
+from IPython.display import Image, display
+
+if not os.path.exists("Screenshots"):
+    os.makedirs("Screenshots")
+
+# Remove existing screenshots
+for filename in os.listdir("Screenshots"):
+    if filename.endswith(".png"):
+        file_path = os.path.join("Screenshots", filename)
+        os.remove(file_path)
+
+config = {}
+try:
+    with open("Config.txt", "r") as config_file:
+        for line in config_file:
+            if '=' in line:
+                key, value = line.strip().split("=")
+                config[key] = int(value)
+except FileNotFoundError:
+    print("Note: Config.txt file not found. Using default values.")
+
+num_screenshots = config.get("num_screenshots", 30)
+intervals = config.get("intervals", 5)
+
+for i in range(1, num_screenshots + 1):
+    x = os.path.join("Screenshots", f"Screenshot_{i:03d}.png")
+    screenshot = pyautogui.screenshot()
+    screenshot.save(x)
+
+    display(Image(filename=x))
+
+    print(f"Captured Screenshot {i}: {x}")
+
+    print("*" * 100)
+
+    time.sleep(intervals)
