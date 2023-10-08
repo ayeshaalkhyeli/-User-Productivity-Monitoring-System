@@ -1,0 +1,29 @@
+import openai
+
+api_key = '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'
+openai.api_key = api_key
+
+def send_message(message):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": message},
+        ]
+    )
+    return response['choices'][0]['message']['content']
+
+keywordFile = open("keywords.txt","r")
+keywords = keywordFile.readlines()
+keywordFile.close()
+
+question = "Are the following words related to programming, education, academics, \
+            research, online shopping, illegal activity, inappropriate content, or \
+            social media? Words: " + str(keywords) + " Your answer should be just \
+            one category from the list I provided (i.e., programming, education, \
+            academics, research, online shopping, illegal activity, inappropriate \
+            content, or social media)"
+
+category = send_message(question)
+print("Text:", keywords)
+print("Category:", category)
