@@ -1,39 +1,33 @@
 import pyautogui
-import time
 import os
-from IPython.display import Image, display
+import time
+from IPython.display import display, Image
 
-if not os.path.exists("Screenshots"):
-    os.makedirs("Screenshots")
+# Read values from the "Config.txt" file
+ConfigFile = open("Config.txt", "r")
+Config = ConfigFile.readlines()
+ConfigFile.close()
 
-# Remove existing screenshots
-for filename in os.listdir("Screenshots"):
-    if filename.endswith(".png"):
-        file_path = os.path.join("Screenshots", filename)
-        os.remove(file_path)
-
-config = {}
-try:
-    with open("Config.txt", "r") as config_file:
-        for line in config_file:
-            if '=' in line:
-                key, value = line.strip().split("=")
-                config[key] = int(value)
-except FileNotFoundError:
-    print("Note: Config.txt file not found. Using default values.")
-
-num_screenshots = config.get("num_screenshots", 30)
-intervals = config.get("intervals", 5)
-
-for i in range(1, num_screenshots + 1):
-    x = os.path.join("Screenshots", f"Screenshot_{i:03d}.png")
-    screenshot = pyautogui.screenshot()
-    screenshot.save(x)
-
-    display(Image(filename=x))
-
-    print(f"Captured Screenshot {i}: {x}")
-
-    print("*" * 100)
-
+i = 1
+while True:
+    screenshot_path = os.path.join("Screenshots", f"Screenshot_{i:03d}.png")
+    pyautogui.screenshot().save(screenshot_path)
+    display(Image(filename=screenshot_path))  # Display the captured screenshot
+    print(f"Captured Screenshot {i}: {screenshot_path}")
+    i += 1
     time.sleep(intervals)
+
+# Check if screenshots should be deleted
+if delete_screenshots:
+    screenshots_directory = "Screenshots"
+
+    try:
+        # Delete all files in the "Screenshots" directory
+        for file in os.listdir(screenshots_directory):
+            file_path = os.path.join(screenshots_directory, file)
+            
+            # Skip files/directories starting with "."
+            if not file.startswith("."):
+                os.remove(file_path)
+    except Exception as e:
+        print(f"Error deleting screenshots: {e}")
