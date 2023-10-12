@@ -9,9 +9,17 @@ if not os.path.exists(screenshots_directory):
     os.makedirs(screenshots_directory)
 
 # Read values from the "Config.txt" file
-ConfigFile = open("Config.txt", "r")
-Config = ConfigFile.readlines()
-ConfigFile.close()
+try:
+    with open("Config.txt", "r") as config_file:
+        config = config_file.readlines()
+        # Assuming the first line in the Config.txt file is the interval
+        intervals = int(config[0].strip())
+        # Assuming the second line in the Config.txt file is a boolean indicating whether to delete screenshots
+        delete_screenshots = config[1].strip().lower() == 'true'
+except Exception as e:
+    print(f"Error reading config file: {e}")
+    intervals = 5  # Default interval in case of an error
+    delete_screenshots = False  # Default value
 
 i = 1
 while True:
@@ -20,12 +28,10 @@ while True:
     display(Image(filename=screenshot_path))  # Display the captured screenshot
     print(f"Captured Screenshot {i}: {screenshot_path}")
     i += 1
-time.sleep(intervals)
+    time.sleep(intervals)
 
 # Check if screenshots should be deleted
 if delete_screenshots:
-    screenshots_directory = "Screenshots"
-
     try:
         # Delete all files in the "Screenshots" directory
         for file in os.listdir(screenshots_directory):
@@ -36,4 +42,3 @@ if delete_screenshots:
                 os.remove(file_path)
     except Exception as e:
         print(f"Error deleting screenshots: {e}")
-        
