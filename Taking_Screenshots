@@ -4,17 +4,38 @@ import time
 from IPython.display import display, Image
 
 # Read values from the "Config.txt" file
-ConfigFile = open("Config.txt", "r")
-Config = ConfigFile.readlines()
-ConfigFile.close()
+with open("Config.txt", "r") as ConfigFile:
+    for line in ConfigFile:
+        if line.startswith("#"):
+            # Skip comments
+            continue
 
+        # Split the line into key and value
+        parts = line.split('=')
+
+        # Check if there is an equals sign and at least two parts
+        if len(parts) >= 2:
+            key, value = map(str.strip, parts)
+        else:
+            # Skip lines that do not contain an equals sign or have insufficient parts
+            continue
+
+        if key == "num_screenshots":
+            num_screenshots = int(value)
+        elif key == "intervals":
+            intervals = int(value)
+        elif key == "delete_screenshots":
+            delete_screenshots = value.lower() == 'true'
+
+# Capture screenshots
 i = 1
-while True:
+while (num_screenshots <= 0 or i <= num_screenshots):
     screenshot_path = os.path.join("Screenshots", f"Screenshot_{i:03d}.png")
     pyautogui.screenshot().save(screenshot_path)
     display(Image(filename=screenshot_path))  # Display the captured screenshot
     print(f"Captured Screenshot {i}: {screenshot_path}")
     i += 1
+
     time.sleep(intervals)
 
 # Check if screenshots should be deleted
@@ -25,7 +46,7 @@ if delete_screenshots:
         # Delete all files in the "Screenshots" directory
         for file in os.listdir(screenshots_directory):
             file_path = os.path.join(screenshots_directory, file)
-            
+
             # Skip files/directories starting with "."
             if not file.startswith("."):
                 os.remove(file_path)
