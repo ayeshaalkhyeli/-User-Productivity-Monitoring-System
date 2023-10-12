@@ -3,40 +3,24 @@ import os
 import time
 from IPython.display import display, Image
 
+# Create "Screenshots" directory if it doesn't exist
+screenshots_directory = "Screenshots"
+if not os.path.exists(screenshots_directory):
+    os.makedirs(screenshots_directory)
+
 # Read values from the "Config.txt" file
-with open("Config.txt", "r") as ConfigFile:
-    for line in ConfigFile:
-        if line.startswith("#"):
-            # Skip comments
-            continue
+ConfigFile = open("Config.txt", "r")
+Config = ConfigFile.readlines()
+ConfigFile.close()
 
-        # Split the line into key and value
-        parts = line.split('=')
-
-        # Check if there is an equals sign and at least two parts
-        if len(parts) >= 2:
-            key, value = map(str.strip, parts)
-        else:
-            # Skip lines that do not contain an equals sign or have insufficient parts
-            continue
-
-        if key == "num_screenshots":
-            num_screenshots = int(value)
-        elif key == "intervals":
-            intervals = int(value)
-        elif key == "delete_screenshots":
-            delete_screenshots = value.lower() == 'true'
-
-# Capture screenshots
 i = 1
-while (num_screenshots <= 0 or i <= num_screenshots):
+while True:
     screenshot_path = os.path.join("Screenshots", f"Screenshot_{i:03d}.png")
     pyautogui.screenshot().save(screenshot_path)
     display(Image(filename=screenshot_path))  # Display the captured screenshot
     print(f"Captured Screenshot {i}: {screenshot_path}")
     i += 1
-
-    time.sleep(intervals)
+time.sleep(intervals)
 
 # Check if screenshots should be deleted
 if delete_screenshots:
@@ -52,3 +36,4 @@ if delete_screenshots:
                 os.remove(file_path)
     except Exception as e:
         print(f"Error deleting screenshots: {e}")
+        
