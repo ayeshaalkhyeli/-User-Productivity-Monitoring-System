@@ -27,11 +27,14 @@ def remove_stop_words_spacy(text):
 
 # Function to read settings from a text file
 def read_settings_from_file(file_path):
-    settings = {}
-    with open(file_path, 'r') as file:
-        for line in file:
-            key, value = line.strip().split('=')
-            settings[key] = int(value) if key == 'num_screenshots' else float(value)
+    settings = {'interval': 0, 'num_screenshots': 0}  # Default values
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                key, value = map(str.strip, line.split('='))
+                settings[key] = int(value) if key == 'num_screenshots' else float(value)
+    except Exception as e:
+        print(f"Error reading settings from {file_path}: {e}")
     return settings
 
 # Function to capture screenshots at intervals and extract text
@@ -135,4 +138,5 @@ if delete_screenshots:
 
         print("Screenshots deleted successfully.")
     except Exception as e:
-        print(f"Error deleting screenshots: {e}")
+        pass  # Do nothing if there's an error (including permission error)
+
