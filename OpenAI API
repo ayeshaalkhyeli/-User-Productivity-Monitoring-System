@@ -1,6 +1,6 @@
 import openai
 
-api_key = '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'
+api_key = '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'
 openai.api_key = api_key
 
 def send_message(message):
