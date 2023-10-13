@@ -1,0 +1,138 @@
+import pyautogui
+from PIL import Image
+import pytesseract
+import time
+import os
+import datetime
+from IPython.display import display
+import spacy
+import traceback
+
+# Set Tesseract path (replace with your Tesseract path)
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+# Load spaCy English language model
+nlp = spacy.load("en_core_web_sm")
+
+# Function to create the Screenshots folder if it doesn't exist
+def create_screenshots_folder():
+    if not os.path.exists("Screenshots & Removed Stop Words"):
+        os.mkdir("Screenshots & Removed Stop Words")
+
+# Function to remove stop words from text using spaCy
+def remove_stop_words_spacy(text):
+    doc = nlp(text)
+    filtered_words = [token.text for token in doc if not token.is_stop]
+    return " ".join(filtered_words)
+
+# Function to read settings from a text file
+def read_settings_from_file(file_path):
+    settings = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            key, value = line.strip().split('=')
+            settings[key] = int(value) if key == 'num_screenshots' else float(value)
+    return settings
+
+# Function to capture screenshots at intervals and extract text
+def capture_and_extract_text(interval, num_screenshots):
+    create_screenshots_folder()
+    run_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    data = {
+        "programming": 0,
+        "education": 0,
+        "academics": 0,
+        "research": 0,
+        "online shopping": 0,
+        "illegal activity": 0,
+        "inappropriate content": 0,
+        "social media": 0
+    }
+
+    i = 1
+    while True:
+        if num_screenshots <= 0:
+            break
+
+        elif i > num_screenshots:
+            break
+
+        try:
+            screenshot = pyautogui.screenshot()
+            extracted_text = pytesseract.image_to_string(screenshot)
+
+            # Remove stop words from the extracted text using spaCy
+            extracted_text_filtered = remove_stop_words_spacy(extracted_text)
+
+            # Create a subdirectory for each screenshot
+            screenshot_subdir = os.path.join("Screenshots & Removed Stop Words", f"screenshot_{i}")
+            os.makedirs(screenshot_subdir, exist_ok=True)
+
+            # Define filenames for the screenshot and text file
+            screenshot_filename = os.path.join(screenshot_subdir, f"screenshot_{i}.png")
+            text_filename = os.path.join(screenshot_subdir, f"screenshot_{i}.txt")
+
+            # Save the screenshot and extracted text
+            screenshot.save(screenshot_filename)
+
+            with open(text_filename, "w", encoding="utf-8") as file:
+                file.write(extracted_text_filtered)
+
+            # Display a separator before the screenshot
+            print(f"{'*' * 40}")
+
+            # Display the screenshot within the notebook
+            display(Image.open(screenshot_filename))
+
+            # Display the extracted text within the notebook
+            print(f"Note: Extracted Text from {screenshot_filename} (with stop words removed):\n{extracted_text_filtered}")
+
+            # Update the data dictionary (example: counting occurrences of keywords)
+            for key in data:
+                if key in extracted_text_filtered.lower():
+                    data[key] += 1
+
+            # Display the updated data dictionary
+            print("Data Dictionary:", data)
+
+            # Display a separator after the screenshot
+            print(f"{'*' * 40}")
+
+            time.sleep(interval)
+            i += 1
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            traceback.print_exc()  # Print the traceback for more information
+            break
+
+    return data  # Return the data dictionary for further processing
+
+# Read settings from the text file (Config.txt)
+config_file_path = 'Config.txt'  # Replace with the path to your Config file
+settings = read_settings_from_file(config_file_path)
+
+# Extract the interval and number of screenshots from the settings
+interval = settings.get('interval')
+num_screenshots = settings.get('num_screenshots')
+delete_screenshots = settings.get('delete_screenshots', False)  # Default to False if not specified in Config.txt
+
+# Call the function to capture screenshots and extract text
+data_dictionary = capture_and_extract_text(interval, num_screenshots)
+
+# Check if screenshots should be deleted
+if delete_screenshots:
+    screenshots_directory = "Screenshots & Removed Stop Words"
+
+    try:
+        # Delete all files in the "Screenshots" directory
+        for file in os.listdir(screenshots_directory):
+            file_path = os.path.join(screenshots_directory, file)
+
+            # Skip files/directories starting with "."
+            if not file.startswith("."):
+                os.remove(file_path)
+
+        print("Screenshots deleted successfully.")
+    except Exception as e:
+        print(f"Error deleting screenshots: {e}")
