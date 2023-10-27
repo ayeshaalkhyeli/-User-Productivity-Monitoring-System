@@ -1,0 +1,185 @@
+#Features included:
+#1. Reads configuration file
+#2. Takes screenshots
+#3. Extracts keywords
+#4. Removes stop words
+#5. Deletes screenshots based on configuration settings
+#6. Integration with OpenAI API
+#7. Reads data in a loop and updates categories
+#8. Create a Pie chart based on the information it processes
+
+import pyautogui #Used for automating user interactions with the computer, such as mouse and keyboard inputs
+from PIL import Image #Provides tools for opening, manipulating, and saving image files
+import pytesseract #Enables text extraction from images using Optical Character Recognition (OCR)
+import time #Provides functions for time-related operations and delays in Python programs
+import os #Offers operating system-dependent functionality, like file and directory operations
+import datetime #Provides date and time manipulation capabilities in Python
+from IPython.display import display #Used for displaying digital images media content in IPython environments
+import nltk #Supports natural language processing tasks, including text analysis and language modeling
+from nltk.corpus import stopwords #Accesses a list of common stop words used in text analysis
+import shutil #Provides file operations and high-level file handling
+import openai #Allows integration with the OpenAI language model for natural language processing tasks
+import random #For generating the random numbers 
+
+
+
+# Function to create the Screenshots folder if it doesn't exist and clear its content
+def create_screenshots_folder():
+    screenshots_path = os.path.join(os.path.expanduser("~"), "Documents", "Capstone Project", "Screenshots")
+    
+    # Clear the content of the folder if it exists
+    if os.path.exists(screenshots_path):
+        shutil.rmtree(screenshots_path)
+    
+    # Create the folder
+    os.makedirs(screenshots_path)
+    
+    return screenshots_path
+
+
+
+# Function to read settings from a text file
+def read_settings_from_file(file_path):
+    settings = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            key, value = map(str.strip, line.split('='))
+            settings[key] = int(value) if key == 'num_screenshots' or key == 'interval' else bool(int(value))
+
+    return settings
+
+
+
+
+# Function to remove stop words from text
+def remove_stop_words(text):
+    words = nltk.word_tokenize(text)
+    filtered_words = [word for word in words if word.lower() not in stopwords.words("english")]
+    return " ".join(filtered_words)
+
+
+# Function to check category of the text using OpenAI library
+def check_category(message):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": message},
+        ]
+    )
+    return response['choices'][0]['message']['content']
+
+
+
+
+# Function to capture screenshots at intervals and extract text
+def capture_and_extract_text(settings, screenshots_path):
+    run_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    i = 1
+    while True:
+        num_screenshots = settings['num_screenshots']
+        interval = settings['interval']
+        delete_screenshots = settings['delete_screenshots']
+
+        if num_screenshots <= 0:
+            pass
+        elif i > num_screenshots:
+            break
+
+        screenshot = pyautogui.screenshot()
+        extracted_text = pytesseract.image_to_string(screenshot)
+
+        # Remove stop words from the extracted text
+        extracted_text_filtered = remove_stop_words(extracted_text)
+
+        # Create a subdirectory for each screenshot
+        screenshot_subdir = os.path.join(screenshots_path, f"screenshot_{i}")
+        os.makedirs(screenshot_subdir, exist_ok=True)
+
+        # Define filenames for the screenshot and text file
+        screenshot_filename = os.path.join(screenshot_subdir, f"screenshot_{i}.png")
+        text_filename = os.path.join(screenshot_subdir, f"screenshot_{i}.txt")
+
+        # Save the screenshot
+        screenshot.save(screenshot_filename)
+
+        # Save the extracted text to a text file
+        with open(text_filename, "w", encoding="utf-8") as file:
+            file.write(extracted_text_filtered)
+
+        # Display a separator before the screenshot
+        print(f"{'*' * 40}")
+
+        # Display the screenshot within the notebook
+        display(Image.open(screenshot_filename))
+
+        # Display the extracted text within the notebook
+        print(f"Note: Extracted Text from {screenshot_filename} (with stop words removed):\n{extracted_text_filtered}")
+        
+        # Create a prompt/ question for OpenAI
+        question = "We captured the screenshot and extracted the text from the screenshot. \
+        Stop words have been removed from the text. \
+        The main task is to categorize the text. \
+        Is following text related to programming, education, academics, \
+        research, online shopping, illegal activity, inappropriate content, or \
+        social media?\
+        Text:" + str(extracted_text_filtered) + \
+        " Your answer should be just one category from the list I provided \
+        (i.e., programming, education, academics, research, online shopping, \
+        illegal activity, inappropriate content, or social media)"
+
+        
+        category = check_category(question)
+        print("\nCategory:", category)
+        
+        #Update dictionary based on the category predicted by openai
+        for k in data.keys():
+            if category.find(k) >=0:
+                data[k]= data[k] +1
+        
+        print(data)
+        
+        datafile= open("data"+str(x)+".csv", "w")
+        datafile.write("Category,Score\n")
+        for k in data.keys():
+            datafile.write(k+","+str(data[k])+"\n")
+        datafile.close()
+            
+        
+        # Display a separator after the screenshot
+        print(f"{'*' * 40}")
+
+        #print(f"Delete Screenshots: {delete_screenshots}")
+
+        if delete_screenshots:
+            #print(f"Deleting screenshot: {screenshot_filename}")
+            # Delete the screenshot file
+            os.remove(screenshot_filename)
+
+        i += 1
+        time.sleep(interval)
+
+        
+        
+data= {"education":0, "academics":0, "programming":0, "research":0, "online shopping":0, 
+       "illegal activity":0,"inappropriate content":0, "social media":0}   
+        
+x= random.randint(1,1000)
+
+        
+# Read settings from the text file (Config.txt)
+config_file_path = 'Config.txt'  # Replace with the path to your Config file
+settings = read_settings_from_file(config_file_path)
+
+# Get the Screenshots folder path
+screenshots_path = create_screenshots_folder()
+
+
+# Initiate OpenAI API/library
+api_key = ''
+openai.api_key = api_key
+
+
+# Call the function to capture screenshots and extract text
+capture_and_extract_text(settings, screenshots_path)
