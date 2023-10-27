@@ -13,7 +13,6 @@ from PIL import Image #Provides tools for opening, manipulating, and saving imag
 import pytesseract #Enables text extraction from images using Optical Character Recognition (OCR)
 import time #Provides functions for time-related operations and delays in Python programs
 import os #Offers operating system-dependent functionality, like file and directory operations
-import datetime #Provides date and time manipulation capabilities in Python
 from IPython.display import display #Used for displaying digital images media content in IPython environments
 import nltk #Supports natural language processing tasks, including text analysis and language modeling
 from nltk.corpus import stopwords #Accesses a list of common stop words used in text analysis
