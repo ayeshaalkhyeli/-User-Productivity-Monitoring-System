@@ -1,3 +1,6 @@
+#Features included:
+#1. Create a Pie chart based on the information it processes
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
