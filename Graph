@@ -1,0 +1,20 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load data from the CSV file
+df = pd.read_csv("data204.csv")  # Replace "data.csv" with the actual path to your CSV file
+
+# Extract data from the DataFrame
+categories = df["Category"]  # Replace "Category" with the actual column name in your CSV file
+scores = df["Score"]  # Replace "Score" with the actual column name in your CSV file
+
+# Create a pie chart
+plt.figure(figsize=(8, 8))
+plt.pie(scores, labels=categories, autopct='%1.1f%%', startangle=140)
+plt.axis('equal')  # Equal aspect ratio ensures that the pie chart is circular.
+
+# Add a title
+plt.title("Pie Chart of Categories")
+
+# Display the chart
+plt.show()
