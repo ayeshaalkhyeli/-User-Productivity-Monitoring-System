@@ -6,7 +6,7 @@
 #5. Deletes screenshots based on configuration settings
 #6. Integration with OpenAI API
 #7. Reads data in a loop and updates categories
-#8. Create a Pie chart based on the information it processes
+
 
 import pyautogui #Used for automating user interactions with the computer, such as mouse and keyboard inputs
 from PIL import Image #Provides tools for opening, manipulating, and saving image files
