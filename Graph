@@ -1,23 +1,39 @@
 #Features included:
 #1. Create a Pie chart based on the information it processes
+#2. Save the Pie chart to the Cloud Platform OneDrive  
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 # Load data from the CSV file
-df = pd.read_csv("data204.csv")  # Replace "data.csv" with the actual path to your CSV file
+csv_file_path = "data-11-Nov-23-03-PM.csv"  # Replace with the actual path to your CSV file
+df = pd.read_csv(csv_file_path)
 
 # Extract data from the DataFrame
 categories = df["Category"]  # Replace "Category" with the actual column name in your CSV file
 scores = df["Score"]  # Replace "Score" with the actual column name in your CSV file
+
+# Get the CSV file name (without extension) for the chart title
+csv_file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
 
 # Create a pie chart
 plt.figure(figsize=(8, 8))
 plt.pie(scores, labels=categories, autopct='%1.1f%%', startangle=140)
 plt.axis('equal')  # Equal aspect ratio ensures that the pie chart is circular.
 
-# Add a title
-plt.title("Pie Chart of Categories")
+# Set the chart title to the CSV file name
+plt.title(f"Pie Chart for {csv_file_name}")
 
-# Display the chart
+# Save the chart image to your OneDrive Personal folder
+onedrive_path = os.path.join(os.path.expanduser("~"), "OneDrive", "User Productivity Monitoring System")
+output_folder = os.path.join(onedrive_path, "Charts")  # Create a "Charts" folder if it doesn't exist
+
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+output_path = os.path.join(output_folder, f"{csv_file_name}_pie_chart.JPG")
+plt.savefig(output_path, bbox_inches='tight')
+
+# Display the chart (optional)
 plt.show()
