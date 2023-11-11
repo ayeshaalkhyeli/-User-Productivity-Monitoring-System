@@ -18,7 +18,6 @@ import nltk #Supports natural language processing tasks, including text analysis
 from nltk.corpus import stopwords #Accesses a list of common stop words used in text analysis
 import shutil #Provides file operations and high-level file handling
 import openai #Allows integration with the OpenAI language model for natural language processing tasks
-import random #For generating the random numbers 
 import datetime #Provides tools for working with dates and times.
 
 
@@ -137,13 +136,21 @@ def capture_and_extract_text(settings, screenshots_path):
         for k in data.keys():
             if category.find(k) >=0:
                 data[k]= data[k] +1
+                
+         # Create a formatted date and time string
+        current_datetime = datetime.datetime.now()
+        #date_time_str = current_datetime.strftime("%d-%b-%y-%I-%M-%p")
+        date_time_str = current_datetime.strftime("%d-%b-%y-%I-%p")
+
+        # Use the date and time in the CSV filename
+        datafile_name = f"data-{date_time_str}.csv"
         
         print(data)
         
-        datafile= open("data"+str(x)+".csv", "w")
+        datafile = open(datafile_name, "w")
         datafile.write("Category,Score\n")
         for k in data.keys():
-            datafile.write(k+","+str(data[k])+"\n")
+            datafile.write(f"{k},{str(data[k])}\n")
         datafile.close()
             
         
@@ -165,7 +172,6 @@ def capture_and_extract_text(settings, screenshots_path):
 data= {"education":0, "academics":0, "programming":0, "research":0, "online shopping":0, 
        "illegal activity":0,"inappropriate content":0, "social media":0}   
         
-x= random.randint(1,1000)
 
         
 # Read settings from the text file (Config.txt)
